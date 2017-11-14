@@ -1,0 +1,88 @@
+<!--index.wxml-->
+<view class="page">
+
+  <view class="share-box">
+    <image class="share-img" src="{{sharePic}}" bindload="shareImageLoad" style="height:{{shareImageHeight}}px"></image>
+  </view>
+
+  <view class="banner" bindtap="tapBanner">
+    <image class="banner-img" src="{{bannerImgSrc}}"></image>
+  </view>
+
+  <view class="broadcast cf">
+    <view class="broadcast-icon"></view>
+    <view class="broadcast-title" bindtap="tapBroadcastTitle">
+      <text>{{bannerTitle}}</text>
+    </view>
+  </view>
+
+  <view class="box post cf">
+    <view class="post-user" bindtap="goUserPost">
+      <view class="post-user-icon"></view>
+      <text class="text">我发布的</text>
+    </view>
+    <view class="post-others">
+      <button class="mag-btn post-btn bg-find-car" bindtap="goFindCar">发布找车</button>
+      <button class="mag-btn post-btn bg-find-people" bindtap="goFindPeople">发布找人</button>
+    </view>
+  </view> 
+
+  <view class="box">
+
+    <view class="list-hd has-hairline hairline-in-pseudo-bottom">
+      <view data-type="0" bindtap="refreshList" class="item {{currentType === 0 ? 'current' : ''}}">
+        <text>全部</text>
+      </view>
+      <view data-type="1" bindtap="refreshList" class="item {{currentType === 1 ? 'current' : ''}}">
+        <text>人找车</text>
+      </view>
+      <view data-type="2" bindtap="refreshList" class="item {{currentType === 2 ? 'current' : ''}}">
+        <text>车找人</text>
+      </view>
+      <view class="item" bindtap="goFilterInfo">
+        <text class="filter-condition">筛选</text>
+      </view>
+    </view>
+
+    <view class="list-bd">
+      <block wx:for="{{list}}">
+      <view class="item has-hairline hairline-in-pseudo-bottom">
+        <view class="list-tags">
+          <text class="tag shown-top" wx:if="{{item.istop}}">置顶</text>
+          <text class="tag bg-find-car" wx:if="{{item.type === 1}}">人找车</text>
+          <text class="tag bg-find-people" wx:if="{{item.type === 2}}">车找人</text>
+          <text class="tag num">{{item.user_count}}<text wx:if="{{item.type === 1}}">人</text><text wx:if="{{item.type === 2}}">空位</text></text>
+          <text class="tag-day today" wx:if="{{item.daytype === 1}}">今</text>
+          <text class="tag-day tomorrow" wx:if="{{item.daytype === 2}}">明</text>
+        </view>
+        <view class="list-address">
+          <text>{{item.from_place}}</text>
+          <view class="arr"></view>
+          <text>{{item.to_place}}</text>
+        </view>
+        <view class="list-time">
+          <text class="num">{{item.start_time}}出发</text>
+        </view>
+        <view class="list-sub">
+          <button class="mag-btn btn-call" id="{{item.id}}" bindtap="makeCall">拨号</button>
+          <text class="note" wx:if="{{item.mid_place}}">途径地：{{item.mid_place}}</text>
+          <text class="note" wx:if="{{item.type === 2}}">车型：{{item.car ? item.car : '未知'}}</text>
+          <text class="note" wx:if="{{item.note}}">备注：{{item.note}}</text>
+          <view class="user-info">
+            <view class="sex {{item.sex === 1 ? 'male' : 'female'}}"></view>
+            <text class="field">{{item.name}}</text>
+            <text class="field">{{item.phone}}</text>
+          </view>
+        </view>
+      </view><!-- item end -->
+      </block>
+    </view>
+  </view>
+
+  <view class="empty-plhd" wx:if="{{!list.length}}">
+    <view class=image"></view>
+    <text class="text">暂无拼车信息</text>
+    <text class="text">快发布您的拼车信息吧</text>
+  </view>
+
+</view>

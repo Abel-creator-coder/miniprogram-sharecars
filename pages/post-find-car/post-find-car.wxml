@@ -1,0 +1,142 @@
+<view class="page page-form">
+
+  <view class="mag-top-toast note {{showTopToast ? '' : 'hide-toast'}}">
+    <text class="text">仅需支付<text class="warning-font">{{paymoney}}元</text>即可发布一条拼车信息</text>
+    <view class="close" bindtap="closeTopToast"></view>
+  </view>
+  <view class="weui-cells__title submit-form-top-title {{showTopToast ? 'need-offsety' : ''}}">
+    <text>确认联系人信息</text>
+  </view>
+  <view class="weui-cells contact-form">
+    <view class="weui-cell weui-cell_access">
+      <view class="weui-cell__hd">
+        <text class="weui-label">姓名</text>
+      </view>
+      <view class="weui-cell__bd">
+        <input class="weui-input" bindinput="onNameInput" value="{{username}}" placeholder-class="mag-plhd" />
+      </view>
+      <view class="weui-cell__ft"></view>
+    </view>
+    <view class="weui-cell weui-cell_access" bindtap="showSexActionSheet">
+      <view class="weui-cell__hd">
+        <text class="weui-label">性别</text>
+      </view>
+      <view class="weui-cell__bd sex-text">
+        {{sex}}
+      </view>
+      <view class="weui-cell__ft"></view>
+    </view>
+    <view class="weui-cell weui-cell_access">
+      <view class="weui-cell__hd">
+        <text class="weui-label">手机号码</text>
+      </view>
+      <view class="weui-cell__bd">
+        <input class="weui-input" bindinput="onPhoneInput" type="number" value="{{userphone}}" placeholder-class="mag-plhd" />
+      </view>
+      <view class="weui-cell__ft"></view>
+    </view>
+  </view>
+
+  <!--
+    <view class="weui-cells">
+        <view class="weui-cell weui-cell_access" bindtap="goEditContact">
+            <view class="weui-cell__bd confirm-contact-panel {{usershowname.length ? '': 'empty'}}">
+                <view class="userinfo">
+                    <text class="username">{{usershowname}}</text>
+                    <text class="phone num">{{userphone}}</text>
+                </view>
+                <view class="note">
+                    <text>请设置联系人信息</text>
+                </view>
+            </view>
+            <view class="weui-cell__ft"></view>
+        </view>
+    </view>
+    -->
+
+  <view class="weui-cells__title">
+    <text>填写拼车信息</text>
+  </view>
+  <view class="weui-cells">
+    <view class="weui-cell">
+      <view class="weui-cell__hd">
+        <text class="weui-label">出发地</text>
+      </view>
+      <view class="weui-cell__bd">
+        <input class="weui-input" bindinput="onFromPlace" placeholder-class="mag-plhd" placeholder="请填写出发地" value="{{from_place}}" />
+      </view>
+    </view>
+    <view class="weui-cell">
+      <view class="weui-cell__hd">
+        <text class="weui-label">目的地</text>
+      </view>
+      <view class="weui-cell__bd">
+        <input class="weui-input" bindinput="onToPlace" placeholder-class="mag-plhd" placeholder="请填写目的地" value="{{to_place}}" />
+      </view>
+    </view>
+    <view class="weui-cell weui-cell_select weui-cell_select-after">
+      <view class="weui-cell__hd">
+        <text class="weui-label">出发日期</text>
+      </view>
+      <view class="weui-cell__bd">
+        <picker mode="date" bindchange="dateChange" value="{{date}}" start="{{date}}">
+          <view class="picker weui-select not-default-val">
+            {{date}}
+          </view>
+        </picker>
+      </view>
+    </view>
+    <view class="weui-cell weui-cell_select weui-cell_select-after">
+      <view class="weui-cell__hd">
+        <text class="weui-label">出发时间</text>
+      </view>
+      <view class="weui-cell__bd">
+        <picker mode="time" bindchange="timeChange" value="{{time}}">
+          <view class="picker weui-select not-default-val">
+            {{time}}
+          </view>
+        </picker>
+      </view>
+    </view>
+    <view class="weui-cell weui-cell_select weui-cell_select-after">
+      <view class="weui-cell__hd">
+        <text class="weui-label">乘车人数</text>
+      </view>
+      <view class="weui-cell__bd">
+        <picker bindchange="countOfPassagersChange" value="{{defaultCountOfPassagers}}" range="{{countOfPassagers}}">
+          <view class="picker weui-select {{defaultCountOfPassagers !== 0 ? 'not-default-val' : ''}}">
+            {{countOfPassagers[defaultCountOfPassagers]}}
+          </view>
+        </picker>
+      </view>
+    </view>
+  </view>
+
+  <view class="weui-cells__title">
+    <text>备注留言</text>
+  </view>
+  <view class="weui-cells weui-cells_form">
+    <view class="weui-cell">
+      <view class="weui-cell__bd">
+        <textarea class="weui-textarea" bindblur="onNote" placeholder-class="mag-plhd" placeholder="以上信息还不够？此处可填写备注哦～" value="{{note}}" />
+      </view>
+    </view>
+  </view>
+
+  <view class="weui-agree" wx:if="{{!editId}}">
+    <checkbox-group bindchange="checkboxChange">
+      <label class="mag-agree-control">
+        <checkbox class="weui-agree__checkbox" value="checked" checked="{{checked}}"/>阅读并同意
+      </label>
+      <text class="mag-agree-link" bindtap="goStatement">《免责声明》</text>
+    </checkbox-group>
+  </view>
+
+  <view class="mag-submitbtn-wrap" wx:if="{{!editId}}">
+    <button bindtap="postNow" class="mag-submit-btn" type="primary" disabled="{{submitDisabled}}">立即发布</button>
+  </view>
+  <view class="mag-submitbtn-wrap" wx:if="{{editId}}">
+    <button class="mag-submit-btn" bindtap="savePost" type="primary" disabled="{{submitDisabled}}">保存</button>
+  </view>
+
+</view>

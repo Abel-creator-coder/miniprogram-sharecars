@@ -1,0 +1,38 @@
+.list-bd {
+  overflow: hidden;
+}
+
+.list-bd .item {
+  margin: 0.5rem 20rpx 0 20rpx;
+  padding: 1rem 0.625rem 0.625rem 0.625rem;
+  background-color: #fff;
+  border-radius: 15rpx;
+}
+
+.list-operations {
+  margin: 10px 0 0 0;
+  padding: 10px 0 0 0;
+  overflow: hidden;
+}
+
+.list-operations .btn-item {
+  height: 1.625rem;
+  font-size: 14px;
+  line-height: 1.625rem;
+  margin: 0 0 0 0.625rem;
+  float: right;
+}
+
+.list-operations .btn-item.edit {
+  color: #26b83e;
+  background-color: rgba(38, 184, 62, 0.05);
+  transition: all 0.2s;
+}
+
+.list-operations .btn-item.edit:after {
+  border-color: rgba(38, 184, 62, 1);
+}
+
+.list-operations .btn-item.edit.button-hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
