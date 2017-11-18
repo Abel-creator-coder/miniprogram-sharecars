@@ -1,14 +1,14 @@
-const formatNumber = n => {
-  n = n.toString()
-  return n[1] ? n : '0' + n
-}
+//appid及appsecret
+const AppConf = { 'appid': 'wxaa96bb0942b0eff2', 'appsecret': '0b44d65c2e289bc8bee75e5b9df23b99' };
+const apiHost = 'https://ab.crm.magcloud.cc';
 const formatTime = function (timestamp, fmt) {
   var fmt = fmt || 'yyyy-MM-dd hh:mm';
-  var date = new Date();
-  if (timestamp) {
-    timestamp = parseInt(timestamp);
-    date.setTime(timestamp * 1000);
-  }
+  timestamp = String(timestamp).replace('T',' ').replace('Z','');
+  var date = new Date(timestamp);
+//   if (timestamp) {
+//       timestamp = parseInt(new Date(timestamp).getTime() / 1000);
+//     date.setTime(timestamp * 1000);
+//   }
   var meta = {
     "M+": date.getMonth() + 1,                 //月份   
     "d+": date.getDate(),                    //日   
@@ -26,7 +26,36 @@ const formatTime = function (timestamp, fmt) {
     }
   }
   return fmt;
-}
+};
+const getDayType = function(timestamp) {
+    timestamp = String(timestamp).replace('T', ' ').replace('Z', '');    
+    timestamp = parseInt(new Date(timestamp).getTime() / 1000);
+    var daytype = 0,
+        currentTimestamp = parseInt(new Date().getTime() / 1000),
+        currentDay = new Date().getDate();
+    var currentMonth = new Date().getMonth();
+    var currentYear = new Date().getFullYear();
+
+    var todayStart = currentYear + '-' + (currentMonth + 1) + '-' + currentDay + ' 00:00:00',
+        todayStartTimestamp = parseInt(new Date(todayStart).getTime() / 1000);
+
+    var today = currentYear + '-' + (currentMonth + 1) + '-' + currentDay + ' 23:59:59',
+        todayDiff = parseInt(new Date(today).getTime() / 1000) - parseInt(new Date().getTime() / 1000);
+
+    var isToday = timestamp >= todayStartTimestamp && (timestamp - todayStartTimestamp) < 24 * 60 * 60;
+    if (isToday) {
+        daytype = 1;
+    }
+    var isTomorrow = (timestamp - currentTimestamp - todayDiff) > 0
+        && (timestamp - currentTimestamp - todayDiff) < 24 * 60 * 60;
+    if (isTomorrow) {
+        daytype = 2;
+    }
+    return daytype;
+};
 module.exports = {
-  formatTime: formatTime
+  formatTime: formatTime,
+  getDayType: getDayType,
+  AppConf: AppConf,
+  apiHost: apiHost
 }

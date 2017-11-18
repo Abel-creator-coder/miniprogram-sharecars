@@ -1,17 +1,31 @@
 //app.js
+const util = require('/utils/util.js');
+
 App({
   onLaunch: function () {
-    // 展示本地存储能力
-    var logs = wx.getStorageSync('logs') || []
-    logs.unshift(Date.now())
-    wx.setStorageSync('logs', logs)
-
-    // 登录
-    wx.login({
-      success: res => {
-        // 发送 res.code 到后台换取 openId, sessionKey, unionId
-      }
-    })
+      var self = this;
+    //   wx.checkSession({
+    //       success: function () {
+    //           console.log("登录状态未过期");
+    //           try {
+    //               var value = wx.getStorageSync('token');
+    //               if (value) {
+    //                   console.log(value, "token存在且未过期");
+    //               }
+    //               else{
+    //                   throw "token不存在";
+    //               }
+    //           } catch (e) {
+    //               self.login();
+    //           }
+    //       },
+    //       fail: function () {
+    //           //登录态过期
+    //           // 登录
+    //           self.login();
+    //       }
+    //   })
+      self.login();      
     // 获取用户信息
     wx.getSetting({
       success: res => {
@@ -32,6 +46,90 @@ App({
         }
       }
     })
+  },
+  login: function () {
+      var self = this;
+      wx.login({
+          success: function (res) {
+              if (res.code) {
+                  console.log(res, "wx.login");
+                  wx.request({
+                      url: 'https://example/user/login',
+                      header: {
+                          'content-type': 'application/x-www-form-urlencoded',
+                          'Authorization': 'Basic bXlfYXBwOm15X3NlY3JldA=='
+                      },
+                      method: 'POST',
+                      data: {
+                          'grant_type': 'password',
+                          'username': res.code,
+                          'password': 'azar'
+                      },
+                      success: function (res) {
+                          console.log(res.data, "user/login");
+                          wx.setStorageSync('token', res.data.access_token);
+                          wx.setStorageSync('openid', res.data.openid);
+                      }
+                  })
+              } else {
+                  console.log('获取用户登录态失败！' + res.errMsg)
+              }
+          },
+          fail: function () {
+              console.log("wx.login网络错误");
+          }
+      });
+  },
+  mag: {
+      apiHost: 'https://example',
+      'token': wx.getStorageSync('token'),
+      request: function (url, method, data, suc, fail) {
+          var me = this;
+          wx.request({
+              url: me.apiHost + url,
+              data: data,
+              header: {
+                  'content-type': 'application/x-www-form-urlencoded',
+                  'Authorization': 'Bearer ' + wx.getStorageSync('token')
+              },
+              method: method || 'GET',
+              success: function (res) {
+                  if (suc) {
+                      suc(res);
+                  }
+              },
+              fail: function (res) {
+                  if (fail) {
+                      fail(res);
+                  }
+              }
+          });
+      },
+      alert: function (msg) {
+          wx.showModal({
+              title: '提示',
+              content: msg,
+              success: function (res) {
+              }
+          });
+      },
+      toast: function (msg) {
+          wx.showToast({
+              title: msg,
+              icon: 'success',
+              duration: 1000
+          });
+      },
+      loading: function (msg, duration) {
+          if (!duration) {
+              duration = 2000;
+          }
+          wx.showToast({
+              title: msg,
+              icon: 'loading',
+              duration: duration
+          });
+      }
   },
   globalData: {
     userInfo: null

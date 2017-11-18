@@ -1,4 +1,8 @@
 // pages/my-posted/my-posted.js
+const app = getApp();
+const util = require('../../utils/util.js')
+
+
 Page({
 
   /**
@@ -60,14 +64,17 @@ Page({
         postdate: "2017-09-06 09:35",
         id: 123
       }
-    ]
+    ],
+    loading:false,
+    loaded:false,
+    currentp:1
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    // this.requestFirstPageList();
+    this.requestFirstPageList();
   },
 
   /**
@@ -95,9 +102,40 @@ Page({
    * 生命周期函数--监听页面卸载
    */
   onUnload: function () {
-
   },
-
+  requestFirstPageList: function () {
+      var me = this;
+      if (!me.data.loading) {
+          wx.showToast({
+              title: '加载中...',
+              icon: 'loading',
+              duration: 10000
+          });
+          me.setData({
+              loading: true
+          });
+          app.mag.request('/post/myposts', 'GET', { page: 1, openid: wx.getStorageSync('openid') }, function (res) {
+              if (res.data.code && res.data.data.length) {
+                  for (var item in res.data.data) {
+                      // 今天 明天 数据处理
+                      res.data.data[item].daytype = util.getDayType(res.data.data[item].start_time);
+                      res.data.data[item].start_time = util.formatTime(res.data.data[item].start_time);
+                    //   res.data.data[item].postdate = app.mag.formatTime(res.data.data[item].postdate);
+                  }
+                  me.setData({
+                      list: res.data.data
+                  });
+              }
+              wx.stopPullDownRefresh();
+              wx.hideToast();
+              me.setData({
+                  loading: false,
+                  loaded: false,
+                  currentp: 1
+              });
+          });
+      }
+  },
   /**
    * 页面相关事件处理函数--监听用户下拉动作
    */

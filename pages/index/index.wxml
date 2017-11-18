@@ -17,10 +17,10 @@
   </view>
 
   <view class="box post cf">
-    <view class="post-user" bindtap="goUserPost">
+    <!-- <view class="post-user" bindtap="goUserPost">
       <view class="post-user-icon"></view>
       <text class="text">我发布的</text>
-    </view>
+    </view> -->
     <view class="post-others">
       <button class="mag-btn post-btn bg-find-car" bindtap="goFindCar">发布找车</button>
       <button class="mag-btn post-btn bg-find-people" bindtap="goFindPeople">发布找人</button>

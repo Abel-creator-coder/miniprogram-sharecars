@@ -116,6 +116,98 @@ Page({
       this.setData({ submitDisabled: true });
     }
   },
+  postNow: function () {
+      var me = this;
+      if (!me.data.username || !me.data.userphone) {
+          app.mag.alert('联系人信息不能为空');
+          return;
+      }
+      if (!me.data.from_place) {
+          app.mag.alert('出发地不能为空');
+          return;
+      }
+      if (!me.data.to_place) {
+          app.mag.alert('目的地不能为空');
+          return;
+      }
+      if (!me.data.date) {
+          app.mag.alert('出发日期不能为空');
+          return;
+      }
+      if (!me.data.time) {
+          app.mag.alert('出发时间不能为空');
+          return;
+      }
+      if (parseInt(me.data.defaultCountOfSeats) == 0) {
+          app.mag.alert('空位不能为空');
+          return;
+      }
+      var params = {
+          openid: wx.getStorageSync('openid'),
+          name: me.data.username,
+          phone: me.data.userphone,
+          sex: me.data.usersex == 1 ? 1 : 2,
+          from_place: me.data.from_place,
+          to_place: me.data.to_place,
+          mid_place: me.data.mid_place,
+          car: me.data.car,
+          start_time: me.data.date + ' ' + me.data.time,
+          user_count: me.data.countOfSeats[me.data.defaultCountOfSeats],
+          note: me.data.note,
+          'type': 2,
+          paySource: 1 // 1:小程序
+      };
+      app.mag.request('/findpeople/createpeople', 'POST',params, function (res) {
+          var data = res.data;
+          if (data.code) {
+              var need_pay = data.need_pay;
+              if (need_pay) {
+                  var pay_params = data.pay_params;
+                  wx.requestPayment({
+                      'timeStamp': pay_params.timeStamp + '',
+                      'nonceStr': pay_params.noncestr,
+                      'package': pay_params.package_,
+                      'signType': 'MD5',
+                      'paySign': pay_params.sign,
+                      'success': function (res) {
+                          if (res.errMsg == 'requestPayment:ok') {
+                              //支付成功
+                              //缓存中写入发布成功标注
+                              wx.setStorage({
+                                  key: "publish",
+                                  data: 1
+                              });
+                              wx.showToast({
+                                  title: '发布成功',
+                                  icon: 'success',
+                                  duration: 1000,
+                                  success: function () {
+                                      wx.navigateBack();
+                                  }
+                              });
+                          }
+                      }
+                  });
+
+              } else {
+                  wx.setStorage({
+                      key: "publish",
+                      data: 1
+                  });
+                  wx.showToast({
+                      title: '发布成功',
+                      icon: 'success',
+                      duration: 1000,
+                      success: function () {
+                          wx.navigateBack();
+                      }
+                  });
+              }
+          } else {
+              app.mag.alert(data.msg);
+          }
+      });
+  },
   /**
    * 生命周期函数--监听页面初次渲染完成
    */

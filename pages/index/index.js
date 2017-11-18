@@ -1,5 +1,7 @@
 //index.js
 //获取应用实例
+const util = require('../../utils/util.js')
+
 const app = getApp()
 
 Page({
@@ -11,40 +13,45 @@ Page({
     bannerTitle: "《拼车免责声明》",
     bannerImgSrc:"/images/banner.jpg",
     currentType: 0,
-    list: [{
-      istop: true,
-      type: 1,
-      user_count: 2,
-      daytype: 1,
-      from_place: "张家口",
-      to_place: "北京",
-      startday: "2017-09-06",
-      start_time: "09:35",
-      mid_place: "阳原",
-      car: "大众",
-      note: "不可以吸烟",
-      sex: 1,
-      name: "李占强",
-      phone: "18131359269",
-      id: 123
-    },
-    {
-      istop: true,
-      type: 1,
-      user_count: 2,
-      daytype: 1,
-      from_place: "张家口",
-      to_place: "北京",
-      startday: "2017-09-06",
-      start_time: "09:35",
-      mid_place: "阳原",
-      car: "大众",
-      note: "不可以吸烟",
-      sex: 1,
-      name: "李占强",
-      phone: "18131359269",
-      id: 124
-    }]
+    list:[],
+    // list: [{
+    //   istop: true,
+    //   type: 1,
+    //   user_count: 2,
+    //   daytype: 1,
+    //   from_place: "张家口",
+    //   to_place: "北京",
+    //   startday: "2017-09-06",
+    //   start_time: "09:35",
+    //   mid_place: "阳原",
+    //   car: "大众",
+    //   note: "不可以吸烟",
+    //   sex: 1,
+    //   name: "李占强",
+    //   phone: "18131359269",
+    //   id: 123
+    // },
+    // {
+    //   istop: true,
+    //   type: 1,
+    //   user_count: 2,
+    //   daytype: 1,
+    //   from_place: "张家口",
+    //   to_place: "北京",
+    //   startday: "2017-09-06",
+    //   start_time: "09:35",
+    //   mid_place: "阳原",
+    //   car: "大众",
+    //   note: "不可以吸烟",
+    //   sex: 1,
+    //   name: "李占强",
+    //   phone: "18131359269",
+    //   id: 124
+    // }],
+    filterOptions:{},
+    loading:false,
+    loaded:false,
+    currentp:1
   },
   //事件处理函数
   bindViewTap: function () {
@@ -84,32 +91,32 @@ Page({
     }
   },
   onLoad: function () {
-    if (app.globalData.userInfo) {
-      this.setData({
-        userInfo: app.globalData.userInfo,
-        hasUserInfo: true
-      })
-    } else if (this.data.canIUse) {
-      // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
-      // 所以此处加入 callback 以防止这种情况
-      app.userInfoReadyCallback = res => {
-        this.setData({
-          userInfo: res.userInfo,
-          hasUserInfo: true
-        })
-      }
-    } else {
-      // 在没有 open-type=getUserInfo 版本的兼容处理
-      wx.getUserInfo({
-        success: res => {
-          app.globalData.userInfo = res.userInfo
-          this.setData({
-            userInfo: res.userInfo,
-            hasUserInfo: true
-          })
-        }
-      })
-    }
+    // if (app.globalData.userInfo) {
+    //   this.setData({
+    //     userInfo: app.globalData.userInfo,
+    //     hasUserInfo: true
+    //   })
+    // } else if (this.data.canIUse) {
+    //   app.userInfoReadyCallback = res => {
+    //     this.setData({
+    //       userInfo: res.userInfo,
+    //       hasUserInfo: true
+    //     })
+    //   }
+    // } else {
+    //   wx.getUserInfo({
+    //     success: res => {
+    //       app.globalData.userInfo = res.userInfo
+    //       this.setData({
+    //         userInfo: res.userInfo,
+    //         hasUserInfo: true
+    //       })
+    //     }
+    //   })
+    // }
+      this.requestFirstPageList({
+          type: this.data.currentType
+      });
   },
   tapBroadcastTitle: function () {
     wx.navigateTo({
@@ -131,12 +138,116 @@ Page({
       url: '../post-find-people/post-find-people'
     })
   },
-  getUserInfo: function (e) {
-    console.log(e)
-    app.globalData.userInfo = e.detail.userInfo
-    this.setData({
-      userInfo: e.detail.userInfo,
-      hasUserInfo: true
-    })
+  refreshList: function (event) {
+      this.setData({
+          filterOptions: {}
+      });
+      this.requestFirstPageList({
+          type: event.currentTarget.dataset.type
+      });
+  },
+  requestFirstPageList: function (options) {
+      var me = this;
+      if (!me.data.loading) {
+          wx.showToast({
+              title: '加载中...',
+              icon: 'loading',
+              duration: 10000
+          });
+          me.setData({
+              loading: true
+          });
+          options.page = 1;
+          app.mag.request('/post/myposts','GET', options, function (res) {
+              var newlist = [];
+              if (res.data.code && res.data.data.length) {
+                  wx.hideToast();
+                  newlist = res.data.data;
+                  for (var item in newlist) {
+                      // 今天 明天 数据处理
+                      newlist[item].daytype = util.getDayType(newlist[item].start_time);
+                      newlist[item].start_time = util.formatTime(newlist[item].start_time);
+                    //   newlist[item].postdate = util.formatTime(newlist[item].postdate);
+                  }
+                  me.setData({
+                      list: newlist
+                  });
+              } else {
+                  wx.showToast({
+                      title: '没有更多了~',
+                      icon: 'success',
+                      duration: 1000
+                  });
+              }
+              me.setData({
+                  loading: false,
+                  loaded: false,
+                  currentp: 1,
+                  currentType: parseInt(options.type)
+              });
+              wx.stopPullDownRefresh()
+          });
+      }
+  },
+  onReachBottom: function () {
+      var me = this;
+      if (me.data.loaded) {
+          wx.showToast({
+              title: '没有更多了~',
+              icon: 'success',
+              duration: 1000
+          });
+          return;
+      }
+      if (!me.data.loading) {
+          wx.showToast({
+              title: '加载中...',
+              icon: 'loading',
+              duration: 10000
+          });
+          me.setData({
+              loading: true
+          });
+          var page = me.data.currentp;
+          me.setData({ currentp:page++});
+          me.data.filterOptions.page = me.data.currentp;
+          me.data.filterOptions.type = me.data.currentType;
+          app.mag.request('/post/myposts', 'GET',me.data.filterOptions, function (res) {
+              var list = me.data.list,
+                  newlist = [];
+              if (res.data.code && res.data.data.length) {
+                  wx.hideToast();
+                  newlist = res.data.data;
+                  for (var item in newlist) {
+                      // 今天 明天 数据处理
+                      newlist[item].daytype = app.mag.getDayType(newlist[item].start_time);
+                      newlist[item].start_time = app.mag.formatTime(newlist[item].start_time);
+                    //   newlist[item].postdate = app.mag.formatTime(newlist[item].postdate);
+                  }
+                  for (var i = 0; i < newlist.length; i++) {
+                      list.push(newlist[i]);
+                  }
+                  me.setData({
+                      list: list,
+                      loading: false
+                  });
+              } else {
+                  me.setData({
+                      loading: false,
+                      loaded: true
+                  });
+                  wx.showToast({
+                      title: '没有更多了~',
+                      icon: 'success',
+                      duration: 1000
+                  });
+              }
+          });
+      }
+  },
+  onPullDownRefresh: function () {
+      this.requestFirstPageList({
+          type: this.data.currentType
+      });
   }
 })
